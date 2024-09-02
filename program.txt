@@ -1,0 +1,94 @@
+NEW VAR x = 23
+NEW VAR y = x
+
+NEW MACRO caminar(parametro_1, parametro_2){
+   y = 3;
+}
+
+EXEC{
+   M;
+   R;
+   C;
+   B;
+   P;
+   J(12);
+   G(x, y);
+   
+   caminar(x, y);
+   
+   turnToMy(left);
+   turnToMy(right);
+   turnToMy(back);
+   turnToThe(north);
+   turnToThe(south);
+   turnToThe(east);
+   turnToThe(west);
+   walk(88);
+   jump(88);
+   drop(88);
+   pick(88);
+   grab(88);
+   letGo(88);
+   pop(88);
+   moves(forward, right, left, backwards);
+   nop;
+   safeExe(walk(88));
+   safeExe(jump(88));
+   safeExe(drop(88));
+   safeExe(pick(88));
+   safeExe(grab(88));
+   safeExe(letGo(88));
+   safeExe(pop(88));
+   
+   pop(size);
+   pop(myX);
+   pop(myY);
+   pop(myChips);
+   pop(myBalloons);
+   pop(balloonsHere);
+   pop(chipsHere);
+   pop(roomForChips);
+   
+   if (zero?(3)) then{
+      pop(88);
+   } else{
+      pop(89);
+   } fi;
+   
+   do (zero?(3)){
+      pop(88);
+   } od;
+   
+   do (isFacing?(north)){
+      pop(88);
+   } od;
+   do (isFacing?(south)){
+      pop(88);
+   } od;
+   do (isFacing?(east)){
+      pop(88);
+   } od;
+   do (isFacing?(west)){
+      pop(88);
+   } od;
+   
+   do (isBlocked?(left)){
+      pop(88);
+   } od;
+   do (isBlocked?(right)){
+      pop(88);
+   } od;
+   do (isBlocked?(front)){
+      pop(88);
+   } od;
+   do (isBlocked?(back)){
+      pop(88);
+   } od;
+   
+   do (not(isBlocked?(back))){
+      pop(88);
+   } od;
+   
+   rep 3 times{
+      pop(88);
+   } per;
