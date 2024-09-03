@@ -186,6 +186,8 @@ def parser(tokens):
     
     in_safeexe_pending_command_name = in_safeexe = False
     
+    in_isblocked_pending_rparen = in_isblocked_pending_argument = in_isblocked = False
+    
     for token_object in tokens:
         token = token_object.type
         token_value = token_object.value
@@ -489,6 +491,24 @@ def parser(tokens):
             if token in ['WALK', 'JUMP', 'DROP', 'PICK', 'GRAB', 'LETGO', 'POP']:
                 in_safeexe_pending_command_name = False
                 in_safeexe = False
+            else:
+                print('w')
+                return False
+            
+        # isblocked sequence and correct arguments verification
+        if current_state == 'ISBLOCKED' and token == 'LPAREN':
+            in_isblocked = True
+            in_isblocked_pending_argument = True
+        elif in_isblocked and in_isblocked_pending_argument and current_state == 'LPAREN':
+            if token in ['LEFT', 'RIGHT', 'FRONT', 'BACK']:
+                in_isblocked_pending_argument = False
+                in_isblocked_pending_rparen = True
+            else:
+                print('w')
+                return False
+        elif in_isblocked and in_isblocked_pending_rparen and current_state in ['LEFT', 'RIGHT', 'FRONT', 'BACK']:
+            if token == 'RPAREN':
+                in_isblocked = in_isblocked_pending_rparen = False
             else:
                 print('w')
                 return False
