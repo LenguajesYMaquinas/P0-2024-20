@@ -146,6 +146,7 @@ def parser(tokens):
     
     # Verifications
     brackets_stack = 0
+    parenthesis_stack = 0
     
     variables = []
     macro_parameters_quantity = {}
@@ -193,6 +194,12 @@ def parser(tokens):
             brackets_stack += 1
         elif token == "RBRACKET":
             brackets_stack -= 1
+            
+        # Closing parenthesis verification
+        if token == "LPAREN":
+            parenthesis_stack += 1
+        elif token == "RPAREN":
+            parenthesis_stack -= 1
             
         # Not duplicated variables definition verification
         if current_state == "VAR" and token == "VARIABLE":
@@ -486,7 +493,7 @@ def parser(tokens):
             print('g')          
             return False
     
-    if current_state not in final_states and brackets_stack == 0:
+    if current_state not in final_states and brackets_stack == 0 and parenthesis_stack == 0:
         print('h')
         return False
 
