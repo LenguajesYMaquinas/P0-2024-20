@@ -171,6 +171,8 @@ def parser(tokens):
     pending_comma_from_variable_in_macro_definition = False
     pending_lbracket_in_macro_definition = False
     
+    in_jumpforward = in_jumpforward_pending_rparen = in_jumpforward_pending_value = False
+    
     for token_object in tokens:
         token = token_object.type
         token_value = token_object.value
@@ -260,7 +262,7 @@ def parser(tokens):
             return False
         
         # Semicolons only in levels not equals to level 0
-        if token == 'SEMICOLON' and brackets_stack > 0:
+        if token == 'SEMICOLON' and brackets_stack == 0:
             print(current_state, token_value)
             print('j')
             return False
@@ -313,7 +315,7 @@ def parser(tokens):
                 pending_rparen_in_macro_definition = True
                 pending_variable_in_macro_definition = True
             else:
-                print('j')
+                print('xl')
                 return False
         elif in_macro_definition and (pending_rparen_in_macro_definition or pending_variable_in_macro_definition):
             if pending_variable_in_macro_definition and token == 'VARIABLE':
@@ -329,6 +331,25 @@ def parser(tokens):
                 print('k')
                 return False
             
+        
+        # Jumpforward sequence verification
+        if current_state == 'JUMPFORWARD':
+            in_jumpforward = True
+            in_jumpforward_pending_value = True
+        elif in_jumpforward and current_state == 'LPAREN' and in_jumpforward_pending_value:
+            if token in ["NUMBER", "VARIABLE", "SIZE", "MYX", "MYY", "MYCHIPS", "MYBALLOONS", "BALLOONSHERE", "CHIPSHERE", "ROOMFORCHIPS"]:
+                in_jumpforward_pending_value = False
+                in_jumpforward_pending_rparen = True
+            else:
+                print('l')
+                return False
+        elif in_jumpforward and in_jumpforward_pending_rparen and current_state in ["NUMBER", "VARIABLE", "SIZE", "MYX", "MYY", "MYCHIPS", "MYBALLOONS", "BALLOONSHERE", "CHIPSHERE", "ROOMFORCHIPS"]:
+            if token == "RPAREN":
+                in_jumpforward = False
+                in_jumpforward_pending_rparen = False
+            else:
+                print('m')
+                return False
         
         # States transition
         token_index = adjacency_matrix_order_inverted[token]
