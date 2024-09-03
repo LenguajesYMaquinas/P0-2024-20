@@ -259,6 +259,12 @@ def parser(tokens):
             print('i')
             return False
         
+        # Semicolons only in levels not equals to level 0
+        if token == 'SEMICOLON' and brackets_stack > 0:
+            print(current_state, token_value)
+            print('j')
+            return False
+        
         # Limitations of succesors of VARIABLE token when declaring a variable
         if current_state == 'VAR' and token == 'VARIABLE':
             print("in_variable_definition")
