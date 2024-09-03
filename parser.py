@@ -162,6 +162,9 @@ def parser(tokens):
     macro_calling_parameters_received = 0
     macro_calling_name = None
     
+    in_variable_definition = False
+    pending_equals_in_variable_definition = False
+    
     for token_object in tokens:
         token = token_object.type
         token_value = token_object.value
@@ -240,25 +243,33 @@ def parser(tokens):
             macro_calling_name = None
             
         # EXECs and definitions only in level 0
-        if current_state in ['EXEC', 'NEW'] and brackets_stack > 0:
+        if current_state in ['EXEC'] and brackets_stack > 1:
+            print(current_state, token_value)
+            print('z')
+            return False
+        # EXECs and definitions only in level 0
+        if current_state in ['NEW'] and brackets_stack > 0:
+            print(current_state, token_value)
             print('i')
             return False
         
-        # Not using macros in blocks
-        if current_state in ['LBRACKET', 'SEMICOLON'] and token == 'MACRO':
-            print('l')
-            return False
-            
-        # Not using macros in IF-THEN-ELSE
-        if current_state == 'IF' and brackets_stack > 0:
-            print('m')
-            return False
-        if current_state == 'THEN' and brackets_stack > 0:
-            print('n')
-            return False
-        if current_state == 'ELSE' and brackets_stack > 0:
-            print('o')
-            return False
+        # Limitations of succesors of VARIABLE token when declaring a variable
+        if current_state == 'VAR' and token == 'VARIABLE':
+            in_variable_definition = pending_equals_in_variable_definition = True
+        elif in_variable_definition and pending_equals_in_variable_definition:
+            if token == 'EQUALS':
+                pending_equals_in_variable_definition = False
+            else:
+                print('w')
+                return False
+        elif in_variable_definition and not pending_equals_in_variable_definition and current_state == 'VARIABLE':
+            if token not in ['NEW', 'EXEC']:
+                print('..')
+                return False
+            else:
+                in_variable_definition = False
+        
+        
         
         # States transition
         token_index = adjacency_matrix_order_inverted[token]
