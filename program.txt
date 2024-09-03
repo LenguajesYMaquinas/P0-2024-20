@@ -1,5 +1,5 @@
 NEW VAR x = 23
-NEW VAR y = x
+NEW VAR y = 23
 
 NEW MACRO caminar(parametro_1, parametro_2){
    y = parametro_1;

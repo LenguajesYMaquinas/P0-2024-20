@@ -218,6 +218,7 @@ def parser(tokens):
         if token == "VARIABLE" and macro_in_block:
             if token_value not in variables_in_macro and token_value not in variables and token_value not in macro_parameters_quantity:
                 print('d')
+                print(current_state, token_value)
                 return False
             
         # Allowing using macros in blocks
@@ -237,6 +238,27 @@ def parser(tokens):
             macro_calling_pending_parameters = False
             macro_calling_parameters_received = 0
             macro_calling_name = None
+            
+        # EXECs and definitions only in level 0
+        if current_state in ['EXEC', 'NEW'] and brackets_stack > 0:
+            print('i')
+            return False
+        
+        # Not using macros in blocks
+        if current_state in ['LBRACKET', 'SEMICOLON'] and token == 'MACRO':
+            print('l')
+            return False
+            
+        # Not using macros in IF-THEN-ELSE
+        if current_state == 'IF' and brackets_stack > 0:
+            print('m')
+            return False
+        if current_state == 'THEN' and brackets_stack > 0:
+            print('n')
+            return False
+        if current_state == 'ELSE' and brackets_stack > 0:
+            print('o')
+            return False
         
         # States transition
         token_index = adjacency_matrix_order_inverted[token]
