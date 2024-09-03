@@ -164,6 +164,9 @@ def parser(tokens):
             else:
                 return False
         
+        if current_state == "EQUALS" and token == "VARIABLE" and token_value not in variables:
+            return False
+        
         
         token_index = adjacency_matrix_order_inverted[token]
         if adjacency_matrix[current_state_index][token_index]:
