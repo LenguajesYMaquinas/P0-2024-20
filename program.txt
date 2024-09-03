@@ -3,7 +3,12 @@ NEW VAR y = x
 
 NEW MACRO caminar(parametro_1, parametro_2){
    y = parametro_1;
-   y = parametro_2;
+   x = parametro_2;
+   caminar(x, y);
+}
+
+NEW MACRO asignacion(){
+   x = y;
 }
 
 EXEC{
