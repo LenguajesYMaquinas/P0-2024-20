@@ -163,7 +163,13 @@ def parser(tokens):
     macro_calling_name = None
     
     in_variable_definition = False
-    pending_equals_in_variable_definition = False
+    pending_equals_in_variable_definition = pending_assign_value = value_assigned = False
+    
+    in_macro_definition = pending_lparen_in_macro_definition = False
+    pending_rparen_in_macro_definition = False
+    pending_variable_in_macro_definition = False
+    pending_comma_from_variable_in_macro_definition = False
+    pending_lbracket_in_macro_definition = False
     
     for token_object in tokens:
         token = token_object.type
@@ -255,21 +261,68 @@ def parser(tokens):
         
         # Limitations of succesors of VARIABLE token when declaring a variable
         if current_state == 'VAR' and token == 'VARIABLE':
+            print("in_variable_definition")
             in_variable_definition = pending_equals_in_variable_definition = True
         elif in_variable_definition and pending_equals_in_variable_definition:
             if token == 'EQUALS':
+                pending_assign_value = True
                 pending_equals_in_variable_definition = False
             else:
                 print('w')
                 return False
-        elif in_variable_definition and not pending_equals_in_variable_definition and current_state == 'VARIABLE':
+        elif current_state == "EQUALS" and in_variable_definition and pending_assign_value:
+            if token in ["NUMBER", "VARIABLE", "SIZE", "MYX", "MYY", "MYCHIPS", "MYBALLOONS", "BALLOONSHERE", "CHIPSHERE", "ROOMFORCHIPS"]:
+                pending_equals_in_variable_definition = False
+                pending_assign_value = False
+                value_assigned = True
+            else:
+                print('x')
+                return False
+        elif in_variable_definition and value_assigned and current_state in ["NUMBER", "VARIABLE", "SIZE", "MYX", "MYY", "MYCHIPS", "MYBALLOONS", "BALLOONSHERE", "CHIPSHERE", "ROOMFORCHIPS"]:
             if token not in ['NEW', 'EXEC']:
+                #print(current_state, token_value)
                 print('..')
                 return False
             else:
+                print("out of in_variable_definition")
+                value_assigned = False
                 in_variable_definition = False
         
-        
+        # Validation of macro definition sequence
+        if current_state == 'MACRO' and token == 'VARIABLE':
+            in_macro_definition = pending_lparen_in_macro_definition = True
+        elif pending_lbracket_in_macro_definition:
+            if token == 'LBRACKET':
+                pending_lbracket_in_macro_definition = False
+                in_macro_definition = pending_lparen_in_macro_definition = False
+                pending_rparen_in_macro_definition = False
+                pending_variable_in_macro_definition = False
+                pending_comma_from_variable_in_macro_definition = False
+            else:
+                print('h')
+                return False
+        elif in_macro_definition and pending_lparen_in_macro_definition:
+            if token == 'LPAREN':
+                pending_lparen_in_macro_definition = False
+                pending_rparen_in_macro_definition = True
+                pending_variable_in_macro_definition = True
+            else:
+                print('j')
+                return False
+        elif in_macro_definition and (pending_rparen_in_macro_definition or pending_variable_in_macro_definition):
+            if pending_variable_in_macro_definition and token == 'VARIABLE':
+                pending_comma_from_variable_in_macro_definition = True
+            elif pending_comma_from_variable_in_macro_definition and token == 'COMMA':
+                pending_comma_from_variable_in_macro_definition = False
+                pending_variable_in_macro_definition = True
+            elif token == 'RPAREN':
+                pending_rparen_in_macro_definition = False
+                pending_variable_in_macro_definition = False
+                pending_lbracket_in_macro_definition = True
+            else:
+                print('k')
+                return False
+            
         
         # States transition
         token_index = adjacency_matrix_order_inverted[token]
