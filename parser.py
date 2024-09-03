@@ -146,7 +146,14 @@ def parser(tokens):
     
     # Verifications
     brackets_stack = 0
+    
     variables = []
+    
+    macro_pending_parameters = False
+    macro_recieving_parameters = False
+    variables_in_macro = []
+    macro_pending_block =  False
+    macro_in_block = False
     
     for token_object in tokens:
         token = token_object.type
@@ -164,15 +171,33 @@ def parser(tokens):
             else:
                 return False
         
-        if current_state == "EQUALS" and token == "VARIABLE" and token_value not in variables:
+        if current_state == "EQUALS" and token == "VARIABLE" and token_value not in variables and not macro_in_block:
             return False
         
+        if token == "MACRO":
+            macro_pending_block = True
+            macro_pending_parameters = True
+        if token == "LPAREN" and macro_pending_parameters:
+            macro_recieving_parameters = True
+        if token == "VARIABLE" and macro_recieving_parameters:
+            variables_in_macro.append(token_value)
+        if token == "RPAREN" and macro_recieving_parameters:
+            macro_recieving_parameters = False
+            macro_pending_parameters = False
+        if token == "LBRACKET" and macro_pending_block:
+            macro_in_block = True
+        if token == "RBRACKET" and macro_in_block:
+            macro_in_block = False
+            variables_in_macro = []
+        if token == "VARIABLE" and macro_in_block:
+            if token_value not in variables_in_macro and token_value not in variables:
+                return False
         
         token_index = adjacency_matrix_order_inverted[token]
         if adjacency_matrix[current_state_index][token_index]:
             current_state = token
             current_state_index = adjacency_matrix_order_inverted[current_state]
-        else:
+        else:            
             return False
     
     if current_state not in final_states and brackets_stack == 0:
