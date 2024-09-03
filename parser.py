@@ -178,6 +178,8 @@ def parser(tokens):
     
     in_assignment_pending_value = in_assignment_pending_equals = in_assignment = False
     
+    in_turntomy_pending_rparen = in_turntomy_pending_argument = in_turntomy = False
+    
     for token_object in tokens:
         token = token_object.type
         token_value = token_object.value
@@ -376,7 +378,7 @@ def parser(tokens):
             if token not in ["COMMA", "RPAREN"]:
                 return False
             
-        # assignment sequence and correct value verification
+        # Assignment sequence and correct value verification
         if current_state in ["LBRACKET", "SEMICOLON"] and token == 'VARIABLE':
             if token_value not in variables and token_value not in variables_in_macro and token_value not in macro_parameters_quantity:
                 print(token_value)
@@ -401,6 +403,26 @@ def parser(tokens):
             if token == 'VARIABLE' and (token_value not in variables and token_value not in variables_in_macro):
                 print('r')
                 return False
+            
+        # TURNTOMY sequence and correct argument verification
+        if current_state == 'TURNTOMY':
+            in_turntomy = True
+            in_turntomy_pending_argument = True
+        elif in_turntomy and in_turntomy_pending_argument and current_state == 'LPAREN':
+            if token in ['LEFT', 'RIGHT', 'BACK']:
+                in_turntomy_pending_argument = False
+                in_turntomy_pending_rparen = True
+            else:
+                print('s')
+                return False
+        elif in_turntomy and in_turntomy_pending_rparen:
+            if token == 'RPAREN':
+                in_turntomy = False
+                in_turntomy_pending_rparen = False
+            else:
+                print('t')
+                return False
+        
             
                 
             
