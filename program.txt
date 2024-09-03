@@ -45,13 +45,6 @@ EXEC{
    pop(88);
    moves(forward, right, left, backwards);
    nop;
-   safeExe(walk(88));
-   safeExe(jump(88));
-   safeExe(drop(88));
-   safeExe(pick(88));
-   safeExe(grab(88));
-   safeExe(letGo(88));
-   safeExe(pop(88));
    
    pop(size);
    pop(myX);
@@ -105,4 +98,12 @@ EXEC{
    rep 3 times{
       pop(88);
    } per;
+
+   safeExe(walk(88));
+   safeExe(jump(88));
+   safeExe(drop(88));
+   safeExe(pick(88));
+   safeExe(grab(88));
+   safeExe(letGo(88));
+   safeExe(pop(88));
 }

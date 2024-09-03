@@ -184,9 +184,12 @@ def parser(tokens):
     
     in_moves_pending_rparen = in_moves_pending_arguments = in_moves = False
     
+    in_safeexe_pending_command_name = in_safeexe = False
+    
     for token_object in tokens:
         token = token_object.type
         token_value = token_object.value
+        print(parenthesis_stack)
         print("{}: {}".format(token, token_object.value))
         
         # Closing brackets verification
@@ -478,7 +481,17 @@ def parser(tokens):
         
         
             
-                
+        # SAFEEXE sequence and correct arguments verification
+        if current_state == 'SAFEEXE' and token == 'LPAREN':
+            in_safeexe = True
+            in_safeexe_pending_command_name = True
+        elif in_safeexe and in_safeexe_pending_command_name and current_state == 'LPAREN':
+            if token in ['WALK', 'JUMP', 'DROP', 'PICK', 'GRAB', 'LETGO', 'POP']:
+                in_safeexe_pending_command_name = False
+                in_safeexe = False
+            else:
+                print('w')
+                return False
             
             
         
@@ -493,7 +506,7 @@ def parser(tokens):
             print('g')          
             return False
     
-    if current_state not in final_states and brackets_stack == 0 and parenthesis_stack == 0:
+    if current_state not in final_states or brackets_stack != 0 or parenthesis_stack != 0:
         print('h')
         return False
 
