@@ -176,10 +176,12 @@ def parser(tokens):
     goto_parameters_received = 0
     in_goto_pending_values = in_goto =  False
     
+    in_assignment_pending_value = in_assignment_pending_equals = in_assignment = False
+    
     for token_object in tokens:
         token = token_object.type
         token_value = token_object.value
-        #print("{}: {}".format(token, token_object.value))
+        print("{}: {}".format(token, token_object.value))
         
         # Closing brackets verification
         if token == "LBRACKET":
@@ -272,7 +274,7 @@ def parser(tokens):
         
         # Limitations of succesors of VARIABLE token when declaring a variable
         if current_state == 'VAR' and token == 'VARIABLE':
-            print("in_variable_definition")
+            #print("in_variable_definition")
             in_variable_definition = pending_equals_in_variable_definition = True
         elif in_variable_definition and pending_equals_in_variable_definition:
             if token == 'EQUALS':
@@ -295,7 +297,7 @@ def parser(tokens):
                 print('..')
                 return False
             else:
-                print("out of in_variable_definition")
+                #print("out of in_variable_definition")
                 value_assigned = False
                 in_variable_definition = False
         
@@ -373,6 +375,35 @@ def parser(tokens):
                 goto_parameters_received = 0
             if token not in ["COMMA", "RPAREN"]:
                 return False
+            
+        # assignment sequence and correct value verification
+        if current_state in ["LBRACKET", "SEMICOLON"] and token == 'VARIABLE':
+            if token_value not in variables and token_value not in variables_in_macro and token_value not in macro_parameters_quantity:
+                print(token_value)
+                print('o')
+                return False
+            elif token_value in variables or token_value in variables_in_macro:
+                in_assignment = True
+                in_assignment_pending_equals = True
+        elif in_assignment and in_assignment_pending_equals:
+            if token == 'EQUALS':
+                in_assignment_pending_equals = False
+                in_assignment_pending_value = True
+            else:
+                print('p')
+                return False
+        elif in_assignment and in_assignment_pending_value:
+            if token in ["NUMBER", "VARIABLE", "SIZE", "MYX", "MYY", "MYCHIPS", "MYBALLOONS", "BALLOONSHERE", "CHIPSHERE", "ROOMFORCHIPS"]:
+                in_assignment_pending_value = False
+            else:
+                print('q')
+                return False
+            if token == 'VARIABLE' and (token_value not in variables and token_value not in variables_in_macro):
+                print('r')
+                return False
+            
+                
+            
             
         
         
