@@ -137,20 +137,33 @@ def parser(tokens):
             index_initial_node = adjacency_matrix_order_inverted[line[0]]
             index_final_node = adjacency_matrix_order_inverted[line[1]]
             adjacency_matrix[index_initial_node][index_final_node] = True
-            adjacency_matrix[index_final_node][index_initial_node] = True
         line = graph_file.readline()
-        
+    
+    # States transitions
     current_state = 'INITIAL'
     current_state_index = adjacency_matrix_order_inverted[current_state]
-    brackets_stack = 0
     final_states = ["INITIAL", "RBRACKET", "NUMBER", "VARIABLE", "SIZE", "MYX", "MYY", "MYCHIPS", "MYBALLOONS", "BALLOONSHERE", "CHIPSHERE", "ROOMFORCHIPS"]
+    
+    # Verifications
+    brackets_stack = 0
+    variables = []
+    
     for token_object in tokens:
         token = token_object.type
+        token_value = token_object.value
+        #print("{}: {}".format(token, token_object.value))
         
         if token == "LBRACKET":
             brackets_stack += 1
         elif token == "RBRACKET":
             brackets_stack -= 1
+            
+        if current_state == "VAR" and token == "VARIABLE":
+            if token_value not in variables:
+                variables.append(token_value)
+            else:
+                return False
+        
         
         token_index = adjacency_matrix_order_inverted[token]
         if adjacency_matrix[current_state_index][token_index]:
