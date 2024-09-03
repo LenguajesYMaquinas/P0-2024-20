@@ -181,6 +181,8 @@ def parser(tokens):
     in_turntomy_pending_rparen = in_turntomy_pending_argument = in_turntomy = False
     in_turntothe_pending_rparen = in_turntothe_pending_argument = in_turntothe = False
     
+    in_moves_pending_rparen = in_moves_pending_arguments = in_moves = False
+    
     for token_object in tokens:
         token = token_object.type
         token_value = token_object.value
@@ -445,6 +447,28 @@ def parser(tokens):
             else:
                 print('t')
                 return False
+            
+        # MOVES sequence and correct arguments verification
+        if current_state == 'MOVES' and token == 'LPAREN':
+            in_moves = True
+            in_moves_pending_arguments = True
+        elif in_moves and in_moves_pending_arguments and current_state in ['LPAREN', 'COMMA']:
+            if token in ['FORWARD', 'RIGHT', 'LEFT', 'BACKWARDS']:
+                in_moves_pending_rparen = True
+            else:
+                print('u')
+                return False
+        elif in_moves and in_moves_pending_rparen:
+            if token == 'RPAREN':
+                in_moves = False
+                in_moves_pending_arguments = False
+                in_moves_pending_rparen = False
+            elif token == 'COMMA':
+                in_moves_pending_arguments = True
+            else:
+                print('v')
+                return False
+        
         
             
                 
