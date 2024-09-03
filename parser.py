@@ -340,8 +340,8 @@ def parser(tokens):
                 return False
             
         
-        # Jumpforward sequence verification
-        if current_state == 'JUMPFORWARD':
+        # 'JUMPFORWARD', 'WALK', 'JUMP', 'DROP', 'PICK', 'GRAB', 'LETGO', 'POP' sequence  and argument verification
+        if current_state in ['JUMPFORWARD', 'WALK', 'JUMP', 'DROP', 'PICK', 'GRAB', 'LETGO', 'POP']:
             in_jumpforward = True
             in_jumpforward_pending_value = True
         elif in_jumpforward and current_state == 'LPAREN' and in_jumpforward_pending_value:
@@ -350,6 +350,9 @@ def parser(tokens):
                 in_jumpforward_pending_rparen = True
             else:
                 print('l')
+                return False
+            if token == 'VARIABLE' and (token_value not in variables and token_value not in variables_in_macro):
+                print('r')
                 return False
         elif in_jumpforward and in_jumpforward_pending_rparen and current_state in ["NUMBER", "VARIABLE", "SIZE", "MYX", "MYY", "MYCHIPS", "MYBALLOONS", "BALLOONSHERE", "CHIPSHERE", "ROOMFORCHIPS"]:
             if token == "RPAREN":
