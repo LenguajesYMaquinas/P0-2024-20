@@ -173,6 +173,9 @@ def parser(tokens):
     
     in_jumpforward = in_jumpforward_pending_rparen = in_jumpforward_pending_value = False
     
+    goto_parameters_received = 0
+    in_goto_pending_values = in_goto =  False
+    
     for token_object in tokens:
         token = token_object.type
         token_value = token_object.value
@@ -350,6 +353,28 @@ def parser(tokens):
             else:
                 print('m')
                 return False
+            
+        # Goto sequence and correct arguments verification
+        if current_state == 'GOTO':
+            in_goto = True
+            in_goto_pending_values = True
+        elif in_goto and in_goto_pending_values and current_state in ['LPAREN', 'COMMA'] and token in ["NUMBER", "VARIABLE", "SIZE", "MYX", "MYY", "MYCHIPS", "MYBALLOONS", "BALLOONSHERE", "CHIPSHERE", "ROOMFORCHIPS"]:
+            goto_parameters_received += 1
+            if token == 'VARIABLE' and token_value not in variables and not macro_in_block:
+                print('dfdf')
+                return False
+        elif in_goto and in_goto_pending_values and current_state in ["NUMBER", "VARIABLE", "SIZE", "MYX", "MYY", "MYCHIPS", "MYBALLOONS", "BALLOONSHERE", "CHIPSHERE", "ROOMFORCHIPS"]:
+            if token == "RPAREN":
+                in_goto = False
+                in_goto_pending_values = False
+                if goto_parameters_received != 2:
+                    print('n')
+                    return False
+                goto_parameters_received = 0
+            if token not in ["COMMA", "RPAREN"]:
+                return False
+            
+        
         
         # States transition
         token_index = adjacency_matrix_order_inverted[token]

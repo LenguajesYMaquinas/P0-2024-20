@@ -1,10 +1,11 @@
 NEW VAR x = 23
 NEW VAR y = 23
+NEW VAR w = 23
 
 NEW MACRO caminar(parametro_1, parametro_2){
-   y = parametro_1;
    x = parametro_2;
    caminar(x, y);
+   G(w,parametro_2);
 }
 
 NEW MACRO asignacion(){
@@ -18,7 +19,7 @@ EXEC{
    B;
    P;
    J(12);
-   G(x, y);
+   G(x,w);
    
    caminar(x, y);
    
