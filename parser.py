@@ -142,14 +142,24 @@ def parser(tokens):
         
     current_state = 'INITIAL'
     current_state_index = adjacency_matrix_order_inverted[current_state]
+    brackets_stack = 0
+    final_states = ["INITIAL", "RBRACKET", "NUMBER", "VARIABLE", "SIZE", "MYX", "MYY", "MYCHIPS", "MYBALLOONS", "BALLOONSHERE", "CHIPSHERE", "ROOMFORCHIPS"]
     for token_object in tokens:
         token = token_object.type
+        
+        if token == "LBRACKET":
+            brackets_stack += 1
+        elif token == "RBRACKET":
+            brackets_stack -= 1
+        
         token_index = adjacency_matrix_order_inverted[token]
         if adjacency_matrix[current_state_index][token_index]:
             current_state = token
             current_state_index = adjacency_matrix_order_inverted[current_state]
         else:
-            print(token_object, current_state, token)
             return False
-        
+    
+    if current_state not in final_states and brackets_stack == 0:
+        return False
+
     return True
