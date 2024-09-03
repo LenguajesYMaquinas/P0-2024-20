@@ -179,6 +179,7 @@ def parser(tokens):
     in_assignment_pending_value = in_assignment_pending_equals = in_assignment = False
     
     in_turntomy_pending_rparen = in_turntomy_pending_argument = in_turntomy = False
+    in_turntothe_pending_rparen = in_turntothe_pending_argument = in_turntothe = False
     
     for token_object in tokens:
         token = token_object.type
@@ -419,6 +420,25 @@ def parser(tokens):
             if token == 'RPAREN':
                 in_turntomy = False
                 in_turntomy_pending_rparen = False
+            else:
+                print('t')
+                return False
+            
+        # TURNTOTHE sequence and correct argument verification
+        if current_state == 'TURNTOTHE':
+            in_turntothe = True
+            in_turntothe_pending_argument = True
+        elif in_turntothe and in_turntothe_pending_argument and current_state == 'LPAREN':
+            if token in ['NORTH', 'SOUTH', 'EAST', 'WEST']:
+                in_turntothe_pending_argument = False
+                in_turntothe_pending_rparen = True
+            else:
+                print('s')
+                return False
+        elif in_turntothe and in_turntothe_pending_rparen:
+            if token == 'RPAREN':
+                in_turntothe = False
+                in_turntothe_pending_rparen = False
             else:
                 print('t')
                 return False
