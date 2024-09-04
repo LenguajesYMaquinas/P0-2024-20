@@ -190,6 +190,7 @@ def parser(tokens):
     
     in_isfacing_pending_rparen = in_isfacing_pending_argument = in_isfacing = False
 
+    in_not = in_not_pending_condition = False
     
     for token_object in tokens:
         token = token_object.type
@@ -530,6 +531,18 @@ def parser(tokens):
         elif in_isfacing and in_isfacing_pending_rparen and current_state in ['NORTH', 'SOUTH', 'EAST', 'WEST']:
             if token == 'RPAREN':
                 in_isfacing = in_isfacing_pending_rparen = False
+            else:
+                print('w')
+                return False
+            
+        # not sequence and correct arguments verification
+        if current_state == 'NOT' and token == 'LPAREN':
+            in_not = True
+            in_not_pending_condition = True
+        elif in_not and in_not_pending_condition and current_state == 'LPAREN':
+            if token in ['ISBLOCKED', 'ISFACING', 'ISZERO', 'NOT']:
+                in_not = False
+                in_not_pending_condition = False
             else:
                 print('w')
                 return False

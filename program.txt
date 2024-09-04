@@ -91,7 +91,7 @@ EXEC{
       pop(88);
    } od;
    
-   do (not(isBlocked?(back))){
+   do (not(not(isBlocked?(back)))){
       pop(88);
    } od;
    
