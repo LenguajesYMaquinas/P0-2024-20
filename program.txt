@@ -70,6 +70,9 @@ EXEC{
    
    do (zero?(3)){
       pop(88);
+      do (zero?(3)){
+         pop(88);
+      } od
    } od;
    
    do (isFacing?(north)){
