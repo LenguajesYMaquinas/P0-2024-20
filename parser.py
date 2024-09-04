@@ -192,6 +192,8 @@ def parser(tokens):
 
     in_not = in_not_pending_condition = False
     
+    if_stack = then_stack = do_stack = rep_stack = 0
+    
     for token_object in tokens:
         token = token_object.type
         token_value = token_object.value
@@ -209,6 +211,32 @@ def parser(tokens):
             parenthesis_stack += 1
         elif token == "RPAREN":
             parenthesis_stack -= 1
+            
+        # Closing if verification
+        if token == "IF":
+            if_stack += 1
+        elif token == "FI":
+            then_stack -= 1
+            
+        # Closing then verification
+        if token == "THEN":
+            then_stack += 1
+        elif token == "ELSE":
+            then_stack -= 1
+            
+        #Closing do verification
+        if token == "DO":
+            do_stack += 1
+        elif token == "OD":
+            do_stack -= 1
+            
+        # Closing rep verification
+        if token == "REP":
+            rep_stack += 1
+        elif token == "TIMES":
+            rep_stack += 1
+        elif token == "PER":
+            rep_stack -= 2
             
         # Not duplicated variables definition verification
         if current_state == "VAR" and token == "VARIABLE":
@@ -560,7 +588,7 @@ def parser(tokens):
             print('g')          
             return False
     
-    if current_state not in final_states or brackets_stack != 0 or parenthesis_stack != 0:
+    if current_state not in final_states or brackets_stack != 0 or parenthesis_stack != 0 or if_stack != 0 or then_stack != 0 or do_stack != 0 or rep_stack != 0:
         print('h')
         return False
 
