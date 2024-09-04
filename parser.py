@@ -140,12 +140,10 @@ def parser(tokens):
         
     adjacency_matrix_copy = adjacency_matrix.copy()
     
-    # States transitions
     current_state = 'INITIAL'
     current_state_index = adjacency_matrix_order_inverted[current_state]
     final_states = ["INITIAL", "RBRACKET", "NUMBER", "VARIABLE", "SIZE", "MYX", "MYY", "MYCHIPS", "MYBALLOONS", "BALLOONSHERE", "CHIPSHERE", "ROOMFORCHIPS"]
     
-    # Verifications
     brackets_stack = 0
     parenthesis_stack = 0
     
@@ -204,40 +202,32 @@ def parser(tokens):
     for token_object in tokens:
         token = token_object.type
         token_value = token_object.value
-        print(if_stack)
-        print("{}: {}".format(token, token_object.value))
         
-        # Closing brackets verification
         if token == "LBRACKET":
             brackets_stack += 1
         elif token == "RBRACKET":
             brackets_stack -= 1
             
-        # Closing parenthesis verification
         if token == "LPAREN":
             parenthesis_stack += 1
         elif token == "RPAREN":
             parenthesis_stack -= 1
             
-        # Closing if verification
         if token == "IF":
             if_stack += 1
         elif token == "FI":
             if_stack -= 1
             
-        # Closing then verification
         if token == "THEN":
             then_stack += 1
         elif token == "ELSE":
             then_stack -= 1
             
-        #Closing do verification
         if token == "DO":
             do_stack += 1
         elif token == "OD":
             do_stack -= 1
             
-        # Closing rep verification
         if token == "REP":
             rep_stack += 1
         elif token == "TIMES":
@@ -245,29 +235,22 @@ def parser(tokens):
         elif token == "PER":
             rep_stack -= 2
             
-        # Not duplicated variables definition verification
         if current_state == "VAR" and token == "VARIABLE":
             if token_value not in variables:
                 variables.append(token_value)
             else:
-                print('a')
                 return False
         
-        # Use of variables already declareds verification
         if current_state == "EQUALS" and token == "VARIABLE" and token_value not in variables and not macro_in_block:
-            print('b')
             return False
         
-        # Not duplicated macros definition verification
         if current_state == "MACRO" and token == "VARIABLE":
             if token_value not in macro_parameters_quantity:
                 macro_parameters_quantity[token_value] = 0
                 current_macro_in_definition_name = token_value
             else:
-                print('c')
                 return False
         
-        # Use in MACROs of parameters and variables already declared verification
         if token == "MACRO":
             macro_pending_block = True
             macro_pending_parameters = True
@@ -285,18 +268,13 @@ def parser(tokens):
             macro_in_block = False
             macro_pending_block = False
             variables_in_macro = []
-            print(macro_parameters_quantity)
             current_macro_in_definition_name = None
         if token == "VARIABLE" and macro_in_block:
             if token_value not in variables_in_macro and token_value not in variables and token_value not in macro_parameters_quantity:
-                print('d')
-                print(current_state, token_value)
                 return False
             
-        # Allowing using macros in blocks
         if current_state in ['LBRACKET', 'SEMICOLON'] and token == 'VARIABLE':
             if token_value not in variables_in_macro and token_value not in variables and token_value not in macro_parameters_quantity:
-                print('e')
                 return False 
             elif token_value in macro_parameters_quantity:
                 macro_calling_pending_parameters = True
@@ -305,39 +283,26 @@ def parser(tokens):
             macro_calling_parameters_received += 1
         if current_state == 'VARIABLE' and token == 'RPAREN' and macro_calling_pending_parameters:
             if macro_calling_parameters_received!= macro_parameters_quantity[macro_calling_name]:
-                print('f')
                 return False
             macro_calling_pending_parameters = False
             macro_calling_parameters_received = 0
             macro_calling_name = None
             
-        # EXECs and definitions only in level 0
         if current_state in ['EXEC'] and brackets_stack > 1:
-            print(current_state, token_value)
-            print('z')
             return False
-        # EXECs and definitions only in level 0
         if current_state in ['NEW'] and brackets_stack > 0:
-            print(current_state, token_value)
-            print('i')
             return False
         
-        # Semicolons only in levels not equals to level 0
         if token == 'SEMICOLON' and brackets_stack == 0:
-            print(current_state, token_value)
-            print('j')
             return False
         
-        # Limitations of succesors of VARIABLE token when declaring a variable
         if current_state == 'VAR' and token == 'VARIABLE':
-            #print("in_variable_definition")
             in_variable_definition = pending_equals_in_variable_definition = True
         elif in_variable_definition and pending_equals_in_variable_definition:
             if token == 'EQUALS':
                 pending_assign_value = True
                 pending_equals_in_variable_definition = False
             else:
-                print('w')
                 return False
         elif current_state == "EQUALS" and in_variable_definition and pending_assign_value:
             if token in ["NUMBER", "VARIABLE", "SIZE", "MYX", "MYY", "MYCHIPS", "MYBALLOONS", "BALLOONSHERE", "CHIPSHERE", "ROOMFORCHIPS"]:
@@ -345,19 +310,14 @@ def parser(tokens):
                 pending_assign_value = False
                 value_assigned = True
             else:
-                print('x')
                 return False
         elif in_variable_definition and value_assigned and current_state in ["NUMBER", "VARIABLE", "SIZE", "MYX", "MYY", "MYCHIPS", "MYBALLOONS", "BALLOONSHERE", "CHIPSHERE", "ROOMFORCHIPS"]:
             if token not in ['NEW', 'EXEC']:
-                #print(current_state, token_value)
-                print('..')
                 return False
             else:
-                #print("out of in_variable_definition")
                 value_assigned = False
                 in_variable_definition = False
         
-        # Validation of macro definition sequence
         if current_state == 'MACRO' and token == 'VARIABLE':
             in_macro_definition = pending_lparen_in_macro_definition = True
         elif pending_lbracket_in_macro_definition:
@@ -368,7 +328,6 @@ def parser(tokens):
                 pending_variable_in_macro_definition = False
                 pending_comma_from_variable_in_macro_definition = False
             else:
-                print('h')
                 return False
         elif in_macro_definition and pending_lparen_in_macro_definition:
             if token == 'LPAREN':
@@ -376,7 +335,6 @@ def parser(tokens):
                 pending_rparen_in_macro_definition = True
                 pending_variable_in_macro_definition = True
             else:
-                print('xl')
                 return False
         elif in_macro_definition and (pending_rparen_in_macro_definition or pending_variable_in_macro_definition):
             if pending_variable_in_macro_definition and token == 'VARIABLE':
@@ -389,11 +347,9 @@ def parser(tokens):
                 pending_variable_in_macro_definition = False
                 pending_lbracket_in_macro_definition = True
             else:
-                print('k')
                 return False
             
         
-        # 'JUMPFORWARD', 'WALK', 'JUMP', 'DROP', 'PICK', 'GRAB', 'LETGO', 'POP', ISZERO sequence  and argument verification
         if current_state in ['JUMPFORWARD', 'WALK', 'JUMP', 'DROP', 'PICK', 'GRAB', 'LETGO', 'POP', 'ISZERO']:
             in_jumpforward = True
             in_jumpforward_pending_value = True
@@ -402,44 +358,35 @@ def parser(tokens):
                 in_jumpforward_pending_value = False
                 in_jumpforward_pending_rparen = True
             else:
-                print('l')
                 return False
             if token == 'VARIABLE' and (token_value not in variables and token_value not in variables_in_macro):
-                print('r')
                 return False
         elif in_jumpforward and in_jumpforward_pending_rparen and current_state in ["NUMBER", "VARIABLE", "SIZE", "MYX", "MYY", "MYCHIPS", "MYBALLOONS", "BALLOONSHERE", "CHIPSHERE", "ROOMFORCHIPS"]:
             if token == "RPAREN":
                 in_jumpforward = False
                 in_jumpforward_pending_rparen = False
             else:
-                print('m')
                 return False
             
-        # Goto sequence and correct arguments verification
         if current_state == 'GOTO':
             in_goto = True
             in_goto_pending_values = True
         elif in_goto and in_goto_pending_values and current_state in ['LPAREN', 'COMMA'] and token in ["NUMBER", "VARIABLE", "SIZE", "MYX", "MYY", "MYCHIPS", "MYBALLOONS", "BALLOONSHERE", "CHIPSHERE", "ROOMFORCHIPS"]:
             goto_parameters_received += 1
             if token == 'VARIABLE' and token_value not in variables and not macro_in_block:
-                print('dfdf')
                 return False
         elif in_goto and in_goto_pending_values and current_state in ["NUMBER", "VARIABLE", "SIZE", "MYX", "MYY", "MYCHIPS", "MYBALLOONS", "BALLOONSHERE", "CHIPSHERE", "ROOMFORCHIPS"]:
             if token == "RPAREN":
                 in_goto = False
                 in_goto_pending_values = False
                 if goto_parameters_received != 2:
-                    print('n')
                     return False
                 goto_parameters_received = 0
             if token not in ["COMMA", "RPAREN"]:
                 return False
             
-        # Assignment sequence and correct value verification
         if current_state in ["LBRACKET", "SEMICOLON"] and token == 'VARIABLE':
             if token_value not in variables and token_value not in variables_in_macro and token_value not in macro_parameters_quantity:
-                print(token_value)
-                print('o')
                 return False
             elif token_value in variables or token_value in variables_in_macro:
                 in_assignment = True
@@ -449,19 +396,15 @@ def parser(tokens):
                 in_assignment_pending_equals = False
                 in_assignment_pending_value = True
             else:
-                print('p')
                 return False
         elif in_assignment and in_assignment_pending_value:
             if token in ["NUMBER", "VARIABLE", "SIZE", "MYX", "MYY", "MYCHIPS", "MYBALLOONS", "BALLOONSHERE", "CHIPSHERE", "ROOMFORCHIPS"]:
                 in_assignment_pending_value = False
             else:
-                print('q')
                 return False
             if token == 'VARIABLE' and (token_value not in variables and token_value not in variables_in_macro):
-                print('r')
                 return False
             
-        # TURNTOMY sequence and correct argument verification
         if current_state == 'TURNTOMY':
             in_turntomy = True
             in_turntomy_pending_argument = True
@@ -470,17 +413,14 @@ def parser(tokens):
                 in_turntomy_pending_argument = False
                 in_turntomy_pending_rparen = True
             else:
-                print('s')
                 return False
         elif in_turntomy and in_turntomy_pending_rparen:
             if token == 'RPAREN':
                 in_turntomy = False
                 in_turntomy_pending_rparen = False
             else:
-                print('t')
                 return False
             
-        # TURNTOTHE sequence and correct argument verification
         if current_state == 'TURNTOTHE':
             in_turntothe = True
             in_turntothe_pending_argument = True
@@ -489,17 +429,14 @@ def parser(tokens):
                 in_turntothe_pending_argument = False
                 in_turntothe_pending_rparen = True
             else:
-                print('s')
                 return False
         elif in_turntothe and in_turntothe_pending_rparen:
             if token == 'RPAREN':
                 in_turntothe = False
                 in_turntothe_pending_rparen = False
             else:
-                print('t')
                 return False
             
-        # MOVES sequence and correct arguments verification
         if current_state == 'MOVES' and token == 'LPAREN':
             in_moves = True
             in_moves_pending_arguments = True
@@ -507,7 +444,6 @@ def parser(tokens):
             if token in ['FORWARD', 'RIGHT', 'LEFT', 'BACKWARDS']:
                 in_moves_pending_rparen = True
             else:
-                print('u')
                 return False
         elif in_moves and in_moves_pending_rparen:
             if token == 'RPAREN':
@@ -517,12 +453,10 @@ def parser(tokens):
             elif token == 'COMMA':
                 in_moves_pending_arguments = True
             else:
-                print('v')
                 return False
         
         
             
-        # SAFEEXE sequence and correct arguments verification
         if current_state == 'SAFEEXE' and token == 'LPAREN':
             in_safeexe = True
             in_safeexe_pending_command_name = True
@@ -531,10 +465,8 @@ def parser(tokens):
                 in_safeexe_pending_command_name = False
                 in_safeexe = False
             else:
-                print('w')
                 return False
             
-        # isblocked sequence and correct arguments verification
         if current_state == 'ISBLOCKED' and token == 'LPAREN':
             in_isblocked = True
             in_isblocked_pending_argument = True
@@ -543,16 +475,13 @@ def parser(tokens):
                 in_isblocked_pending_argument = False
                 in_isblocked_pending_rparen = True
             else:
-                print('w')
                 return False
         elif in_isblocked and in_isblocked_pending_rparen and current_state in ['LEFT', 'RIGHT', 'FRONT', 'BACK']:
             if token == 'RPAREN':
                 in_isblocked = in_isblocked_pending_rparen = False
             else:
-                print('w')
                 return False
             
-        # isfacing sequence and correct arguments verification
         if current_state == 'ISFACING' and token == 'LPAREN':
             in_isfacing = True
             in_isfacing_pending_argument = True
@@ -561,16 +490,13 @@ def parser(tokens):
                 in_isfacing_pending_argument = False
                 in_isfacing_pending_rparen = True
             else:
-                print('w')
                 return False
         elif in_isfacing and in_isfacing_pending_rparen and current_state in ['NORTH', 'SOUTH', 'EAST', 'WEST']:
             if token == 'RPAREN':
                 in_isfacing = in_isfacing_pending_rparen = False
             else:
-                print('w')
                 return False
             
-        # not sequence and correct arguments verification
         if current_state == 'NOT' and token == 'LPAREN':
             in_not = True
             in_not_pending_condition = True
@@ -579,10 +505,8 @@ def parser(tokens):
                 in_not = False
                 in_not_pending_condition = False
             else:
-                print('w')
                 return False
             
-        # if sequence and correct arguments verification
         if current_state == 'IF' and token == 'LPAREN':
             in_if = True
             in_if_pending_condition = True
@@ -591,14 +515,12 @@ def parser(tokens):
                 in_if_pending_condition = False
                 in_if_pending_rparen = True
             else:
-                print('w')
                 return False
         elif in_if and in_if_pending_rparen and current_state == 'RPAREN':
             if token == 'RPAREN':
                 in_if_pending_rparen = False
                 in_if_pending_then = True
             else:
-                print('w')
                 return False
         elif in_if and in_if_pending_then and current_state == 'RPAREN':
             if token == 'THEN':
@@ -610,7 +532,6 @@ def parser(tokens):
             elif token == 'RPAREN':
                 pass
             else:
-                print('w')
                 return False
         elif in_if and current_state == 'ELSE':
             rbracket_index = adjacency_matrix_order_inverted['RBRACKET']
@@ -621,7 +542,6 @@ def parser(tokens):
             adjacency_matrix = adjacency_matrix_copy.copy()
             in_if = False
             
-        # do sequence and correct arguments verification
         if current_state == 'DO' and token == 'LPAREN':
             in_do = True
             in_do_pending_condition = True
@@ -630,14 +550,12 @@ def parser(tokens):
                 in_do_pending_condition = False
                 in_do_pending_rparen = True
             else:
-                print('w')
                 return False
         elif in_do and in_do_pending_rparen and current_state == 'RPAREN':
             if token == 'RPAREN':
                 in_do_pending_rparen = False
                 in_do_pending_block = True
             else:
-                print('w')
                 return False
         elif in_do and in_do_pending_block and current_state == 'RPAREN':
             if token == 'LBRACKET':
@@ -646,17 +564,14 @@ def parser(tokens):
             elif token == 'RPAREN':
                 pass
             else:
-                print('w')
                 return False
         elif in_do and in_do_pending_od and current_state == 'RBRACKET':
             if token == 'OD':
                 in_do_pending_od = False
                 in_do = False
             else:
-                print('w')
                 return False
             
-        # repeat sequence and correct arguments verification
         if current_state == 'REP' and token in ["NUMBER", "VARIABLE", "SIZE", "MYX", "MYY", "MYCHIPS", "MYBALLOONS", "BALLOONSHERE", "CHIPSHERE", "ROOMFORCHIPS"]:
             in_rep = True
             in_rep_pending_times = True
@@ -665,35 +580,22 @@ def parser(tokens):
                 in_rep_pending_times = False
                 in_rep_pending_per = True
             else:
-                print('w')
                 return False
         elif in_rep and in_rep_pending_per and current_state in ["RBRACKET"]:
             if token == 'PER':
                 in_rep_pending_per = False
                 in_rep = False
             else:
-                print('w')
                 return False
-        
-        # States transition
+ 
         token_index = adjacency_matrix_order_inverted[token]
         if adjacency_matrix[current_state_index][token_index]:
             current_state = token
             current_state_index = adjacency_matrix_order_inverted[current_state]
-        else:
-            print(current_state, token_value)
-            print('g')          
+        else:          
             return False
     
     if current_state not in final_states or brackets_stack != 0 or parenthesis_stack != 0 or if_stack != 0 or then_stack != 0 or do_stack != 0 or rep_stack != 0:
-        print('u')
-        print(current_state)
-        print(brackets_stack)
-        print(parenthesis_stack)
-        print(if_stack)
-        print(then_stack)
-        print(do_stack)
-        print(rep_stack)
         return False
 
     return True

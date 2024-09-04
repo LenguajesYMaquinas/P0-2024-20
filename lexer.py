@@ -1,10 +1,7 @@
 import ply.lex as lex
 
 def lexer(program):
-   # Lista de nombres de tokens
    tokens = (
-      
-      # Commnads
       'MOVEFORWARD',
       'TURNRIGHT',
       'DROPCHIP',
@@ -24,8 +21,6 @@ def lexer(program):
       'MOVES',
       'NOP',
       'SAFEEXE',
-      
-      # Symbols
       'SEMICOLON',
       'LPAREN',
       'RPAREN',
@@ -33,12 +28,8 @@ def lexer(program):
       'EQUALS',
       'LBRACKET',
       'RBRACKET',
-      
-      # Variables and numbers
       'VARIABLE',
       'NUMBER',
-      
-      # Values
       'SIZE',
       'MYX',
       'MYY',
@@ -47,8 +38,6 @@ def lexer(program):
       'BALLOONSHERE',
       'CHIPSHERE',
       'ROOMFORCHIPS',
-      
-      # Directions
       'LEFT',
       'RIGHT',
       'BACK',
@@ -59,14 +48,10 @@ def lexer(program):
       'FORWARD',
       'BACKWARDS',
       'FRONT',
-      
-      # Definitions
       'EXEC',
       'NEW',
       'VAR',
       'MACRO',
-      
-      # Control structures
       'IF',
       'THEN',
       'ELSE',
@@ -76,8 +61,6 @@ def lexer(program):
       'REP',
       'PER',
       'TIMES',
-      
-      # Conditions
       'ISBLOCKED',
       'ISFACING',
       'ISZERO',
@@ -86,7 +69,6 @@ def lexer(program):
       
    )
 
-   # Ignorar espacios, tabulaciones y saltos de línea
    t_ignore = ' \t\n'
 
    def t_MOVEFORWARD(t):
@@ -173,17 +155,14 @@ def lexer(program):
       r'\('
       return t
 
-   # Definir la expresión regular para RPAREN (paréntesis derecho)
    def t_RPAREN(t):
       r'\)'
       return t 
    
-   # Definir la expresión regular para COMMA (coma)
    def t_COMMA(t):
       r','
       return t
 
-   # Definir la expresión regular para EQUALS (=)
    def t_EQUALS(t):
       r'='
       return t
@@ -344,14 +323,10 @@ def lexer(program):
    def t_VARIABLE(t):
       r'[a-zA-Z_][a-zA-Z_0-9]*'
       return t
-
-   # Manejar errores léxicos
+   
    def t_error(t):
-      print(f"Carácter ilegal '{t.value[0]}'")
-      t.lexer.skip(1)
+    print(f"Carácter ilegal '{t.value[0]}' en la línea {t.lineno}")
 
-
-   # Construir el lexer
    lexer = lex.lex()
    lexer.input(program)
 
