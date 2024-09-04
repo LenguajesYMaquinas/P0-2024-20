@@ -57,9 +57,16 @@ EXEC{
    
    if (zero?(3)) then{
       pop(88);
+
+      if (zero?(3)) then{
+      pop(88);
+      } else{
+         pop(89);
+      }  fi;
+
    } else{
       pop(89);
-   } fi;
+   }  fi;
    
    do (zero?(3)){
       pop(88);

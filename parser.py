@@ -127,7 +127,6 @@ def parser(tokens):
         adjacency_matrix_order[i]: i for i in range(len(adjacency_matrix_order))
     }
     adjacency_matrix = [[False for _ in range(len(adjacency_matrix_order))] for _ in range(len(adjacency_matrix_order))]
-    
 
     graph_file = open('graph.txt', 'r')
     line = graph_file.readline()
@@ -138,6 +137,8 @@ def parser(tokens):
             index_final_node = adjacency_matrix_order_inverted[line[1]]
             adjacency_matrix[index_initial_node][index_final_node] = True
         line = graph_file.readline()
+        
+    adjacency_matrix_copy = adjacency_matrix.copy()
     
     # States transitions
     current_state = 'INITIAL'
@@ -194,10 +195,12 @@ def parser(tokens):
     
     if_stack = then_stack = do_stack = rep_stack = 0
     
+    in_if_pending_then = in_if_pending_rparen = in_if_pending_condition = in_if = False
+    
     for token_object in tokens:
         token = token_object.type
         token_value = token_object.value
-        print(parenthesis_stack)
+        print(if_stack)
         print("{}: {}".format(token, token_object.value))
         
         # Closing brackets verification
@@ -216,7 +219,7 @@ def parser(tokens):
         if token == "IF":
             if_stack += 1
         elif token == "FI":
-            then_stack -= 1
+            if_stack -= 1
             
         # Closing then verification
         if token == "THEN":
@@ -575,7 +578,42 @@ def parser(tokens):
                 print('w')
                 return False
             
-            
+        # if sequence and correct arguments verification
+        if current_state == 'IF' and token == 'LPAREN':
+            in_if = True
+            in_if_pending_condition = True
+        elif in_if and in_if_pending_condition and current_state == 'LPAREN':
+            if token in ['ISBLOCKED', 'ISFACING', 'ISZERO', 'NOT']:
+                in_if_pending_condition = False
+                in_if_pending_rparen = True
+            else:
+                print('w')
+                return False
+        elif in_if and in_if_pending_rparen and current_state == 'RPAREN':
+            if token == 'RPAREN':
+                in_if_pending_rparen = False
+                in_if_pending_then = True
+            else:
+                print('w')
+                return False
+        elif in_if and in_if_pending_then and current_state == 'RPAREN':
+            if token == 'THEN':
+                in_if_pending_then = False
+                rbracket_index = adjacency_matrix_order_inverted['RBRACKET']
+                else_index = adjacency_matrix_order_inverted['ELSE']
+                adjacency_matrix[rbracket_index] = [False] * len(adjacency_matrix)
+                adjacency_matrix[rbracket_index][else_index] = True
+            else:
+                print('w')
+                return False
+        elif in_if and current_state == 'ELSE':
+            rbracket_index = adjacency_matrix_order_inverted['RBRACKET']
+            fi_index = adjacency_matrix_order_inverted['FI']
+            adjacency_matrix[rbracket_index] = [False] * len(adjacency_matrix)
+            adjacency_matrix[rbracket_index][fi_index] = True
+        elif in_if and current_state == 'FI':
+            adjacency_matrix = adjacency_matrix_copy.copy()
+            in_if = False
         
         
         # States transition
@@ -589,7 +627,14 @@ def parser(tokens):
             return False
     
     if current_state not in final_states or brackets_stack != 0 or parenthesis_stack != 0 or if_stack != 0 or then_stack != 0 or do_stack != 0 or rep_stack != 0:
-        print('h')
+        print('u')
+        print(current_state)
+        print(brackets_stack)
+        print(parenthesis_stack)
+        print(if_stack)
+        print(then_stack)
+        print(do_stack)
+        print(rep_stack)
         return False
 
     return True
