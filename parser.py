@@ -357,8 +357,8 @@ def parser(tokens):
                 return False
             
         
-        # 'JUMPFORWARD', 'WALK', 'JUMP', 'DROP', 'PICK', 'GRAB', 'LETGO', 'POP' sequence  and argument verification
-        if current_state in ['JUMPFORWARD', 'WALK', 'JUMP', 'DROP', 'PICK', 'GRAB', 'LETGO', 'POP']:
+        # 'JUMPFORWARD', 'WALK', 'JUMP', 'DROP', 'PICK', 'GRAB', 'LETGO', 'POP', ISZERO sequence  and argument verification
+        if current_state in ['JUMPFORWARD', 'WALK', 'JUMP', 'DROP', 'PICK', 'GRAB', 'LETGO', 'POP', 'ISZERO']:
             in_jumpforward = True
             in_jumpforward_pending_value = True
         elif in_jumpforward and current_state == 'LPAREN' and in_jumpforward_pending_value:
