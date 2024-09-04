@@ -199,6 +199,8 @@ def parser(tokens):
     
     in_do_pending_od = in_do_pending_block = in_do_pending_rparen = in_do_pending_condition = in_do = False
     
+    in_rep_pending_per = in_rep_pending_times = in_rep = False
+    
     for token_object in tokens:
         token = token_object.type
         token_value = token_object.value
@@ -653,7 +655,25 @@ def parser(tokens):
             else:
                 print('w')
                 return False
-        
+            
+        # repeat sequence and correct arguments verification
+        if current_state == 'REP' and token in ["NUMBER", "VARIABLE", "SIZE", "MYX", "MYY", "MYCHIPS", "MYBALLOONS", "BALLOONSHERE", "CHIPSHERE", "ROOMFORCHIPS"]:
+            in_rep = True
+            in_rep_pending_times = True
+        elif in_rep and in_rep_pending_times and current_state in ["NUMBER", "VARIABLE", "SIZE", "MYX", "MYY", "MYCHIPS", "MYBALLOONS", "BALLOONSHERE", "CHIPSHERE", "ROOMFORCHIPS"]:
+            if token == 'TIMES':
+                in_rep_pending_times = False
+                in_rep_pending_per = True
+            else:
+                print('w')
+                return False
+        elif in_rep and in_rep_pending_per and current_state in ["RBRACKET"]:
+            if token == 'PER':
+                in_rep_pending_per = False
+                in_rep = False
+            else:
+                print('w')
+                return False
         
         # States transition
         token_index = adjacency_matrix_order_inverted[token]

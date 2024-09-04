@@ -72,7 +72,7 @@ EXEC{
       pop(88);
       do (zero?(3)){
          pop(88);
-      } od
+      } od;
    } od;
    
    do (isFacing?(north)){
@@ -107,6 +107,9 @@ EXEC{
    
    rep 3 times{
       pop(88);
+      rep 3 times{
+         pop(88);
+      } per;
    } per;
 
    safeExe(walk(88));
