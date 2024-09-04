@@ -188,6 +188,9 @@ def parser(tokens):
     
     in_isblocked_pending_rparen = in_isblocked_pending_argument = in_isblocked = False
     
+    in_isfacing_pending_rparen = in_isfacing_pending_argument = in_isfacing = False
+
+    
     for token_object in tokens:
         token = token_object.type
         token_value = token_object.value
@@ -509,6 +512,24 @@ def parser(tokens):
         elif in_isblocked and in_isblocked_pending_rparen and current_state in ['LEFT', 'RIGHT', 'FRONT', 'BACK']:
             if token == 'RPAREN':
                 in_isblocked = in_isblocked_pending_rparen = False
+            else:
+                print('w')
+                return False
+            
+        # isfacing sequence and correct arguments verification
+        if current_state == 'ISFACING' and token == 'LPAREN':
+            in_isfacing = True
+            in_isfacing_pending_argument = True
+        elif in_isfacing and in_isfacing_pending_argument and current_state == 'LPAREN':
+            if token in ['NORTH', 'SOUTH', 'EAST', 'WEST']:
+                in_isfacing_pending_argument = False
+                in_isfacing_pending_rparen = True
+            else:
+                print('w')
+                return False
+        elif in_isfacing and in_isfacing_pending_rparen and current_state in ['NORTH', 'SOUTH', 'EAST', 'WEST']:
+            if token == 'RPAREN':
+                in_isfacing = in_isfacing_pending_rparen = False
             else:
                 print('w')
                 return False
